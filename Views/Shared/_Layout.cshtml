@@ -33,6 +33,23 @@
         </nav>
     </header>
     <div class="container">
+        
+        @{
+            var lastCourseId = Context.Session.GetInt32("LastCourseId");
+            var lastCourseName = Context.Session.GetString("LastCourseName");
+            if (lastCourseId.HasValue && !string.IsNullOrEmpty(lastCourseName))
+            {
+                <div class="alert alert-secondary py-2 mb-3 shadow-sm d-flex justify-content-between align-items-center" role="alert">
+                    <span>
+                        <i class="bi bi-clock-history me-2"></i> Último curso visitado: <strong>@lastCourseName</strong>
+                    </span>
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@lastCourseId" class="btn btn-sm btn-outline-primary">
+                        Volver al curso
+                    </a>
+                </div>
+            }
+        }
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
