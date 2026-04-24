@@ -1,0 +1,55 @@
+@model NuevoPC2.Models.Course
+
+@{
+    ViewData["Title"] = "Detalles del Curso";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="card-title mb-0">@Model.Name</h2>
+                    <span class="badge bg-light text-primary mt-2 fs-6">Código: @Model.Code</span>
+                </div>
+                
+                <div class="card-body p-5">
+                    <h4 class="text-secondary mb-4 border-bottom pb-2">Información Académica</h4>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold text-muted">Créditos:</div>
+                        <div class="col-sm-8 fs-5">@Model.Credits</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 fw-bold text-muted">Horario:</div>
+                        <div class="col-sm-8 fs-5">
+                            <i class="bi bi-clock"></i> @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-4 fw-bold text-muted">Cupo Máximo:</div>
+                        <div class="col-sm-8 fs-5">@Model.MaxCapacity estudiantes</div>
+                    </div>
+
+                    <!-- Botón de Inscripción -->
+                    <div class="d-grid gap-2 mt-5">
+                        <form asp-action="Enroll" asp-controller="Enrollments" method="post" class="w-100">
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success btn-lg w-100 shadow">
+                                <i class="bi bi-check-circle-fill me-2"></i> Inscribirse Ahora
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card-footer text-center py-3 bg-light">
+                    <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+                        <i class="bi bi-arrow-left"></i> Volver al Catálogo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

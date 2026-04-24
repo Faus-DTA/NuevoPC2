@@ -1,0 +1,93 @@
+@model NuevoPC2.ViewModels.CourseFilterViewModel
+
+@{
+    ViewData["Title"] = "Catálogo de Cursos";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-primary">Catálogo de Cursos Disponibles</h1>
+
+    <!-- Tarjeta de Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Filtros de Búsqueda</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="SearchName" class="form-label"></label>
+                        <input asp-for="SearchName" class="form-control" placeholder="Ej: Programación" />
+                        <span asp-validation-for="SearchName" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label asp-for="MinCredits" class="form-label"></label>
+                        <input asp-for="MinCredits" class="form-control" type="number" min="0" placeholder="Min" />
+                        <span asp-validation-for="MinCredits" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MaxCredits" class="form-label"></label>
+                        <input asp-for="MaxCredits" class="form-control" type="number" min="0" placeholder="Max" />
+                        <span asp-validation-for="MaxCredits" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="FilterStartTime" class="form-label"></label>
+                        <input asp-for="FilterStartTime" class="form-control" type="time" />
+                        <span asp-validation-for="FilterStartTime" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="FilterEndTime" class="form-label"></label>
+                        <input asp-for="FilterEndTime" class="form-control" type="time" />
+                        <span asp-validation-for="FilterEndTime" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Resultados -->
+    @if (!Model.Courses.Any())
+    {
+        <div class="alert alert-info">
+            No se encontraron cursos activos con los filtros aplicados.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var course in Model.Courses)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <span class="badge bg-secondary mb-2">@course.Code</span>
+                            <h5 class="card-title text-dark">@course.Name</h5>
+                            <ul class="list-unstyled mt-3 mb-4">
+                                <li><strong>Créditos:</strong> @course.Credits</li>
+                                <li><strong>Horario:</strong> @course.StartTime.ToString(@"hh\:mm") - @course.EndTime.ToString(@"hh\:mm")</li>
+                                <li><strong>Cupos:</strong> @course.MaxCapacity</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-white border-0 text-center">
+                            <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-outline-primary w-100">Ver Detalles</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
