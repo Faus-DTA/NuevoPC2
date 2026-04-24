@@ -1,0 +1,72 @@
+@model NuevoPC2.Models.Course
+
+@{
+    ViewData["Title"] = "Editar Curso";
+}
+
+<div class="container mt-4">
+    <h2>Editar Curso: @Model.Code</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label asp-for="Code" class="form-label"></label>
+                    <input asp-for="Code" class="form-control" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Credits" class="form-label"></label>
+                        <input asp-for="Credits" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="Credits" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="MaxCapacity" class="form-label"></label>
+                        <input asp-for="MaxCapacity" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="StartTime" class="form-label"></label>
+                        <input asp-for="StartTime" class="form-control" type="time" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="EndTime" class="form-label"></label>
+                        <input asp-for="EndTime" class="form-control" type="time" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label class="form-check-label" asp-for="IsActive">
+                        ¿Curso Activo?
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
