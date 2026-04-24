@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 using NuevoPC2.Data;
+using NuevoPC2.Models;
 using NuevoPC2.ViewModels;
 
 namespace NuevoPC2.Controllers;
@@ -8,31 +11,50 @@ namespace NuevoPC2.Controllers;
 public class CoursesController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDistributedCache _cache;
+    private const string CacheKey = "ActiveCoursesList";
 
-    public CoursesController(ApplicationDbContext context)
+    public CoursesController(ApplicationDbContext context, IDistributedCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     // GET: Courses
     public async Task<IActionResult> Index(CourseFilterViewModel filter)
     {
-        // 1. Obtener la consulta base: Solo cursos activos
-        var query = _context.Courses.Where(c => c.IsActive).AsQueryable();
+        List<Course> activeCourses;
 
-        // 2. Si el modelo es inválido (por las validaciones de créditos negativos o fechas),
-        // devolvemos la vista inmediatamente sin aplicar los filtros problemáticos.
+        // 1. Obtener de caché o base de datos
+        var cachedCourses = await _cache.GetStringAsync(CacheKey);
+        if (string.IsNullOrEmpty(cachedCourses))
+        {
+            activeCourses = await _context.Courses.Where(c => c.IsActive).ToListAsync();
+            
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+            };
+            await _cache.SetStringAsync(CacheKey, JsonSerializer.Serialize(activeCourses), cacheOptions);
+        }
+        else
+        {
+            activeCourses = JsonSerializer.Deserialize<List<Course>>(cachedCourses) ?? new List<Course>();
+        }
+
+        // 2. Si el modelo es inválido, devolver la lista completa
         if (!ModelState.IsValid)
         {
-            // Solo devolvemos la lista de cursos sin filtrar para que el usuario vea el error
-            filter.Courses = await query.ToListAsync();
+            filter.Courses = activeCourses;
             return View(filter);
         }
 
-        // 3. Aplicar filtros
+        // 3. Aplicar filtros en memoria
+        var query = activeCourses.AsEnumerable();
+
         if (!string.IsNullOrEmpty(filter.SearchName))
         {
-            query = query.Where(c => c.Name.ToLower().Contains(filter.SearchName.ToLower()));
+            query = query.Where(c => c.Name.Contains(filter.SearchName, StringComparison.OrdinalIgnoreCase));
         }
 
         if (filter.MinCredits.HasValue)
@@ -56,7 +78,7 @@ public class CoursesController : Controller
         }
 
         // 4. Asignar resultados al ViewModel
-        filter.Courses = await query.ToListAsync();
+        filter.Courses = query.ToList();
 
         return View(filter);
     }
@@ -76,6 +98,10 @@ public class CoursesController : Controller
         {
             return NotFound();
         }
+
+        // Guardar el último curso visitado en la sesión
+        HttpContext.Session.SetInt32("LastCourseId", course.Id);
+        HttpContext.Session.SetString("LastCourseName", course.Name);
 
         return View(course);
     }
