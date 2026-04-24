@@ -15,7 +15,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
-var redisConnection = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
+var redisConnection = builder.Configuration.GetConnectionString("RedisConnection") 
+                      ?? builder.Configuration["Redis:ConnectionString"] 
+                      ?? "localhost:6379";
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = redisConnection;
